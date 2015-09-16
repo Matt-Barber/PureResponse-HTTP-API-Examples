@@ -104,6 +104,5 @@ class Pure360Http():
 
         :rtype string
         '''
-        print(payload)
         req = requests.post(url, data=payload)
         return req.text
