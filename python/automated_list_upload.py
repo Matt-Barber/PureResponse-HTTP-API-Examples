@@ -38,7 +38,7 @@ class Pure360Http():
             'listName': listName,
             'transactionType': 'CREATE'
         }
-        self.process_list(params, filename)
+       return self.process_list(params, filename)
 
     def replace_list(self, profileName, token, responseType, responseUri, listName, filename):
         '''Replaces a contact list in the given profile (secured by the token)
@@ -59,7 +59,7 @@ class Pure360Http():
             'listName': listName,
             'transactionType': 'REPLACE'
         }
-        self.process_list(params, filename)
+        return self.process_list(params, filename)
 
     def append_list(self, profileName, token, responseType, responseUri, listName, filename):
         '''Appends a contact list in the given profile (secured by the token)
@@ -80,7 +80,7 @@ class Pure360Http():
             'listName': listName,
             'transactionType': 'APPEND'
         }
-        self.process_list(params, filename)
+        return self.process_list(params, filename)
 
     def process_list(self, params, filename):
         '''Processes a list upload
