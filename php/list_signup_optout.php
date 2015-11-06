@@ -1,33 +1,32 @@
 <?php
-/*
+/**
  * An example class for making optin requests to the pure platform
  * PHP Version 5.6+
- * @category Data Gathering
- * @author Matt Barber
- * @created_at 15/09/2015
- */
+ * @category API
+ * @author Matt Barber <mfmbarber@gmail.com>
+**/
 
-  class Pure360Http {
-      const LIST_URL = 'http://response.pure360.com/interface/list.php';
+class Pure360Http
+{
+    const LIST_URL = 'http://response.pure360.com/interface/list.php';
     /**
-     *  Performs a signup to a list
-     *  @param accName      string     A string representing the profile name
-     *  @param listName     string     A string representing the list name
-     *  @param recipient    string     A string representing the contact detail
-     *  @param customData   array      An associative array of headers and
-     *                                 values for the list
-     *  @param doubleOptin  string     A string (boolean) with passively opt
-     *                                 recipient in if set to TRUE (i.e. send a
-     *                                 double optin email)
+     * Performs a signup to a list
+     *
+     * @param string $accName     The name of the profile
+     * @param string $listName    The name of the list in the profile
+     * @param string $recipient   Contact Email / Mobile
+     * @param array  $customData  Assoc_array of headers & values for the list
+     * @param string $doubleOptin A boolean - passively opt recipient if 'TRUE'
+     *
+     * @return string
      **/
-    public function signup (
+    public static function signUp(
         $accName,
         $listName,
         $recipient,
         $customData=[],
         $doubleOptin='FALSE'
-    )
-    {
+    ) {
         $params = [
                 'accName' => $accName,
                 'listName' => $listName,
@@ -36,79 +35,80 @@
                 'errorUrl' => 'NO-REDIRECT'
             ];
         $params = array_merge($params, $customData);
-        if ($this->is_email($recipient))
-        {
+        if (SELF::_isEmail($recipient)) {
             $params['email'] = $recipient;
-        }
-        else
-        {
+        } else {
             $parms['mobile'] = $recipient;
         }
-        return $this->web_request($params, self::LIST_URL);
+        return SELF::_webRequest($params, self::LIST_URL);
     }
     /**
      * Opts a recipient out of a whole profile
-     * @param accName   string  a string representing the profile name
-     * @param recipient    string     A string representing the contact detail
+     *
+     * @param string $accName   The name of the profile
+     * @param string $recipient Contact Email / Mobile
+     *
+     * @return string
     **/
-    public function optout ($accName, $recipient)
+    public static function optOut($accName, $recipient)
     {
         $params = [
                 'accName' => $accName,
                 'mode' => 'OPTOUT'
             ];
-        if ($this->is_email($recipient))
-        {
+        if (SELF::_isEmail($recipient)) {
             $params['email'] = $recipient;
-        }
-        else
-        {
+        } else {
             $parms['mobile'] = $recipient;
         }
-        return $this->web_request($params, self::LIST_URL);
+        return SELF::_webRequest($params, self::LIST_URL);
     }
 
     /**
      * Checks if the recipient is an email or mobile
-     * @param recipient    string     A string representing the contact detail
+     *
+     * @param string $recipient Contact Email / Mobile
+     *
+     * @return boolean
     **/
-    private function is_email ($recipient)
+    private static function _isEmail($recipient)
     {
-        if(is_numeric($recipient))
-        {
-            return FALSE;
-        }
-        else if(preg_match('/[^@]+@[^@]+\.[^@]+/', $recipient) === FALSE)
-        {
-            return TRUE;
-        }
-        else
-        {
-            throw new Exception('Not an email address or mobile number');
+        if (is_numeric($recipient)) {
+            return false;
+        } else if (!filter_var($recipient, FILTER_VALIDATE_EMAIL) === false) {
+            return true;
+        } else {
+            throw new Exception("Not an email address or mobile number : ${recipient}");
         }
     }
     /**
      * This sends the web request using curl to the endpoint
      * with the query parameters
-     * @param payload       array   Query parameters
-     * @param url           string  End point
+     *
+     * @param array  $payload Query parameters
+     * @param string $url     End point
+     *
+     * @return string
     **/
-    private function webRequest($payload, $url)
+    private static function _webRequest($payload, $url)
     {
         $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $url,
-            CURLOPT_HEADER => FALSE,
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_POST => TRUE,
-            CURLOPT_POSTFIELDS => $payload
-        ]);
+        curl_setopt_array(
+            $curl,
+            [
+                CURLOPT_URL => $url,
+                CURLOPT_HEADER => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $payload
+            ]
+        );
         $response = CURL_EXEC($curl);
-        if ($response === FALSE)
+        if ($response === false) {
             throw new exception(CURL_ERROR($curl), CURL_ERRNO($curl));
+        }
         curl_close($curl);
         return $response;
 
     }
-  }
-?>
+}
